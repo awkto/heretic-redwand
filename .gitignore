@@ -1,0 +1,7 @@
+# Commercial game files: never commit
+*.WAD
+*.wad
+*.7z
+!/.gitkeep
+dist/
+__pycache__/

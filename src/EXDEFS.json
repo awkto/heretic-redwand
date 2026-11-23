@@ -1,0 +1,33 @@
+{
+  "type": "exdefs",
+  "version": "1.0.0",
+  "metadata": {
+    "author": "altanc",
+    "timestamp": "2026-11-10T00:00:00+00:00",
+    "application": "N/A",
+    "comment": "Red Elven Wand - root (KEX / Heretic + Hexen remaster)"
+  },
+  "data":
+  {
+    "options": [
+      {
+        "name"        : "redwand_8x",
+        "displayname" : "Red Elven Wand: 8x damage",
+        "description" : "Off = 4x damage, On = 8x damage.",
+        "type"        : "bool",
+        "default"     : false
+      }
+    ],
+    "include": [
+      {
+        "comment": "4x wand (always loaded)",
+        "lumpname": "RW_4X"
+      },
+      {
+        "comment": "8x wand: re-points the GoldWand fire states at the 8x set",
+        "lumpname": "RW_8X",
+        "ifoption": "redwand_8x"
+      }
+    ]
+  }
+}
