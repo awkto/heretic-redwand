@@ -27,6 +27,19 @@
         "comment": "8x wand: re-points the GoldWand fire states at the 8x set",
         "lumpname": "RW_8X",
         "ifoption": "redwand_8x"
+      },
+      {
+        "comment": "Red bow: one fast heavy bolt (three powered)",
+        "lumpname": "RB_BOW"
+      },
+      {
+        "comment": "Double max ammo for wand crystals and arrows",
+        "lumpname": "RW_AMMO"
+      },
+      {
+        "comment": "Enhanced weapons shrink crossbow ammo to 30/60; double those instead",
+        "lumpname": "RW_AMMOX",
+        "ifoption": "heretic_weapons"
       }
     ]
   }
