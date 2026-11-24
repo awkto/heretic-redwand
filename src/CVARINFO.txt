@@ -1,1 +1,2 @@
 server int redwand_mult = 4;
+server bool redwand_hyper = true;

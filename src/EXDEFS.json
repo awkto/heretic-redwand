@@ -5,17 +5,23 @@
     "author": "altanc",
     "timestamp": "2026-11-10T00:00:00+00:00",
     "application": "N/A",
-    "comment": "Red Elven Wand - root (KEX / Heretic + Hexen remaster)"
+    "comment": "Red Elven Wand / Red Bow / Red Dragon Claw / hyper monsters - root (KEX / Heretic + Hexen remaster)"
   },
-  "data":
-  {
+  "data": {
     "options": [
       {
-        "name"        : "redwand_8x",
-        "displayname" : "Red Elven Wand: 8x damage",
-        "description" : "Off = 4x damage, On = 8x damage.",
-        "type"        : "bool",
-        "default"     : false
+        "name": "redwand_8x",
+        "displayname": "Red Elven Wand: 8x damage",
+        "description": "Off = 4x damage, On = 8x damage.",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "redwand_hyper",
+        "displayname": "Red mod: hyper monsters",
+        "description": "Monsters move 2x faster, attack 3x faster, projectiles 3x faster, 4x damage.",
+        "type": "bool",
+        "default": true
       }
     ],
     "include": [
@@ -33,6 +39,10 @@
         "lumpname": "RB_BOW"
       },
       {
+        "comment": "Red Dragon Claw: 9-shot bursts, 2x damage",
+        "lumpname": "RC_CLAW"
+      },
+      {
         "comment": "Double max ammo for wand crystals and arrows",
         "lumpname": "RW_AMMO"
       },
@@ -40,6 +50,11 @@
         "comment": "Enhanced weapons shrink crossbow ammo to 30/60; double those instead",
         "lumpname": "RW_AMMOX",
         "ifoption": "heretic_weapons"
+      },
+      {
+        "comment": "Hyper monsters",
+        "lumpname": "RH_ROOT",
+        "ifoption": "redwand_hyper"
       }
     ]
   }

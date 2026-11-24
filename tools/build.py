@@ -26,6 +26,13 @@ BOW_SPRITES += ['WBOWA0', 'AMC1A0', 'AMC2A0', 'AMC2B0', 'AMC2C0']
 BOW_PREFIXES = ('FX03', 'FX14')                            # bolts, impacts, powered bolts (all rotations)
 BOW_GRAPHICS = ['INAMBOW']
 
+# Red Dragon Claw (Blaster): blue magic -> red. FX18 O-S are left alone: the remaster's
+# Tempest Wand uses those frames too.
+CLAW_SPRITES = ['BLSR' + c + '0' for c in 'ABCD'] + ['AMB1' + c + '0' for c in 'ABC'] + ['AMB2' + c + '0' for c in 'ABC']
+CLAW_SPRITES += ['FX17' + c + '0' for c in 'ABCDEFGHIJKL'] + ['FX18' + c + '0' for c in 'ABCDEFGHIJKLMN']
+CLAW_GRAPHICS = ['INAMBST']
+BLUE = list(range(185, 209))                               # navy -> cyan ramp
+
 RED_RAMP = [251, 250, 249, 248] + list(range(145, 161)) + [161, 162, 163, 164, 165]  # dark red -> hot pink-white
 WARM = list(range(111, 145)) + list(range(241, 248))      # gold/orange/yellow ramps
 GREEN = list(range(209, 225))                              # bright green ramp
@@ -168,8 +175,54 @@ def exdefs_bow():
         'states': states,
     })
 
+def exdefs_claw():
+    """Red Dragon Claw: bursts of 9 shots in ~1 second, then a 1 second cool-off; 2x damage.
+
+    Vanilla shot: hitscan 4*(1..8) (avg 18), ~6 tics apart while held.
+    Red claw: A_WeaponBulletAttack 8*(1..8) (avg 36) every 4 tics x9, then 35 tics without
+    A_WeaponReady (can't fire or switch during the cool-off). A_ConsumeAmmo per shot (clamps at 0,
+    so a burst started with fewer than 9 orbs finishes the burst).
+    Powered (Tome): the game's own A_FireBlasterPL2 (enhanced timing); BlasterFX1 and Ripper damage x2.
+    """
+    p = 'RC_'
+    ready = 'S_HERETIC_BLASTERREADY'
+    st = lambda name, nxt, frame, tics, action=None, args=None: dict(
+        [('name', p + name), ('next', nxt if nxt.startswith(('@', 'S_')) else p + nxt),
+         ('sprite', 'BLSR'), ('frame', frame), ('tics', tics)]
+        + ([('action', action)] if action else []) + ([('args', args)] if args is not None else []))
+    states = [st('Fire01', '@next', 'B!', 2), st('Fire02', '@next', 'C!', 2)]
+    for i in range(1, 10):
+        states += [
+            st('Shot%da' % i, '@next', 'D!', 0, 'A_ConsumeAmmo'),
+            st('Shot%db' % i, '@next', 'D!', 0, 'A_WeaponSound', ['blssht']),
+            st('Shot%dc' % i, '@next', 'D!', 2, 'A_WeaponBulletAttack', [2.8125, 0, 1, 8, 8, 'BlasterPuff1']),
+            st('Shot%dd' % i, '@next', 'C!', 2),
+        ]
+    states += [
+        st('Cool01', '@next', 'B!', 3),
+        st('Cool02', '@next', 'A', 32),
+        st('Cool03', ready, 'A', 0, 'A_ReFire'),
+
+        st('PFire01', '@next', 'D!', 2, 'A_FireBlasterPL2'),
+        st('PFire02', '@next', 'C!', 2),
+        st('PFire03', '@next', 'B!', 2),
+        st('PFire04', '@next', 'A', 5),
+        st('PFire05', ready, 'A', 0, 'A_ReFire'),
+    ]
+    return exdefs_doc('Red Dragon Claw', {
+        'weapons': [
+            {'name': 'Blaster', 'firestate': p + 'Fire01', 'holdstate': p + 'Fire01'},
+            {'name': 'BlasterPowered', 'firestate': p + 'PFire01', 'holdstate': p + 'PFire01'},
+        ],
+        'actors': [
+            {'name': 'BlasterFX1', 'damage': 4},
+            {'name': 'Ripper', 'damage': 2},
+        ],
+        'states': states,
+    })
+
 def exdefs_ammo(enhanced):
-    """Double max ammo and every pickup amount for wand crystals and arrows.
+    """Double max ammo and every pickup amount for wand crystals, arrows and claw orbs.
     The enhanced-weapons option changes crossbow ammo (max 30/60, pickups 3/15/6), so that
     variant doubles those values instead of vanilla's (max 50/100, pickups 5/20/10)."""
     if enhanced:
@@ -179,7 +232,12 @@ def exdefs_ammo(enhanced):
         bow = {'maxammo': 100, 'maxupgradedammo': 200, 'clipammo': 10, 'boxammo': 40, 'backpackammo': 10,
                'weaponammo': 20, 'weaponpieceammo': 20, 'deathmatchweaponammo': 20}
     ammo = [dict(name='CrossbowAmmo', **bow)]
-    if not enhanced:
+    if enhanced:
+        ammo.append({'name': 'BlasterAmmo', 'boxammo': 60})
+    else:
+        ammo.append({'name': 'BlasterAmmo', 'maxammo': 400, 'maxupgradedammo': 800, 'clipammo': 20,
+                     'boxammo': 50, 'backpackammo': 20, 'weaponammo': 60, 'weaponpieceammo': 60,
+                     'deathmatchweaponammo': 60})
         ammo.insert(0, {'name': 'GoldWandAmmo', 'maxammo': 200, 'maxupgradedammo': 400,
                         'clipammo': 20, 'boxammo': 100, 'backpackammo': 20})
     return exdefs_doc('Double ammo' + (' (enhanced weapons)' if enhanced else ''), {'ammo': ammo})
@@ -190,6 +248,9 @@ def main():
     pal = palette(L)
     remap = build_remap(pal, [(WARM, WARM)])
     bow_remap = build_remap(pal, [(WARM, WARM), (GREEN + GREY_GREEN, GREEN)])
+    claw_remap = build_remap(pal, [(BLUE, BLUE)])
+    import hyper
+    hyper_lumps = hyper.build(L, get)
 
     text = lambda f: open(os.path.join(SRC, f), 'rb').read()
     lumps = [
@@ -199,6 +260,8 @@ def main():
         ('RB_BOW', json.dumps(exdefs_bow(), indent=2).encode()),
         ('RW_AMMO', json.dumps(exdefs_ammo(False), indent=2).encode()),
         ('RW_AMMOX', json.dumps(exdefs_ammo(True), indent=2).encode()),
+        ('RC_CLAW', json.dumps(exdefs_claw(), indent=2).encode()),
+    ] + [(k, json.dumps(v, indent=2).encode()) for k, v in hyper_lumps.items()] + [
         ('ZSCRIPT', text('ZSCRIPT.zs')),
         ('CVARINFO', text('CVARINFO.txt')),
         ('MENUDEF', text('MENUDEF.txt')),
@@ -208,6 +271,8 @@ def main():
         lumps.append((g, recolor_patch(get(L, g), remap)))
     for g in BOW_GRAPHICS:
         lumps.append((g, recolor_patch(get(L, g), bow_remap)))
+    for g in CLAW_GRAPHICS:
+        lumps.append((g, recolor_patch(get(L, g), claw_remap)))
     lumps.append(('SS_START', b''))
     for s in SPRITES:
         b = get(L, s)
@@ -215,6 +280,8 @@ def main():
     bow = BOW_SPRITES + [n for n, _ in L if n.startswith(BOW_PREFIXES)]
     for s_ in dict.fromkeys(bow):
         lumps.append((s_, recolor_patch(get(L, s_), bow_remap)))
+    for s_ in CLAW_SPRITES:
+        lumps.append((s_, recolor_patch(get(L, s_), claw_remap)))
     lumps.append(('SS_END', b''))
 
     os.makedirs(os.path.join(ROOT, 'dist'), exist_ok=True)

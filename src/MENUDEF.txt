@@ -11,4 +11,5 @@ AddOptionMenu "OptionsMenu"
 {
 	StaticText " "
 	Option "Red Elven Wand damage", "redwand_mult", "RedWandMult"
+	Option "Red mod: hyper monsters", "redwand_hyper", "OnOff"
 }
