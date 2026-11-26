@@ -61,10 +61,10 @@ class RedWandHandler : EventHandler
 	}
 
 	// --- Hyper monsters -----------------------------------------------------------
-	// Walk and pain sequences run at 2x (twice the A_Chase calls: 2x movement and
-	// twice as many chances to attack), attack sequences at 3x, plus MISSILEMORE /
+	// Walk and pain sequences run at 1.6x (more A_Chase calls: 1.6x movement and
+	// chances to attack), attack sequences at 3x, plus MISSILEMORE /
 	// MISSILEEVENMORE so they decide to shoot more often. 4x damage (DamageMultiply
-	// covers melee and their projectiles). Projectiles 3x faster (capped at 60, same
+	// covers melee and their projectiles). Projectiles 2.4x faster (capped at 60, same
 	// as the remaster).
 	Array<Actor> hyper;
 	Array<State> hyperLast;
@@ -84,7 +84,7 @@ class RedWandHandler : EventHandler
 	static void SpeedUpMissile(Actor m)
 	{
 		if (!m || !m.target || !m.target.bIsMonster || m.target.player || m.Speed <= 0) return;
-		double ns = min(m.Speed * 3, max(m.Speed, 60.));
+		double ns = min(m.Speed * 2.4, max(m.Speed, 60.));
 		double f = ns / m.Speed;
 		m.Speed = ns;
 		m.Vel *= f;
@@ -115,7 +115,7 @@ class RedWandHandler : EventHandler
 				div = 3;
 			else if ((mo.SeeState && mo.InStateSequence(cur, mo.SeeState))
 				|| mo.InStateSequence(cur, mo.FindState("Pain")))
-				div = 2;
+				div = 1.6;
 			if (div == 1) continue;
 			// carry the rounding so a chain of 3-tic frames averages 1.5, not 2
 			double want = mo.tics / div + hyperCarry[i];

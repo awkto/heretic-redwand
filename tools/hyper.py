@@ -18,7 +18,8 @@ from the IWAD at build time.
 import json, math
 
 PROJ_SPEED_CAP = 60
-PROJ_SPEED_MULT, DAMAGE_MULT, TIC_DIV, SEE_DIV = 3, 4, 3, 2
+# v3.1: movement 1.6x (was 2x), projectiles 2.4x (was 3x)
+PROJ_SPEED_MULT, DAMAGE_MULT, TIC_DIV, SEE_DIV = 2.4, 4, 3, 1.6
 
 # Vanilla monster speeds (Heretic info.c / GZDoom).
 MONSTER_SPEED = {
@@ -77,7 +78,7 @@ VANILLA = {
         ('F', 5, *FT), ('F', 5, *FT), ('F', 4, 'A_SnakeAttack', None), ('F', 4, 'A_SnakeAttack', None),
         ('F', 4, 'A_SnakeAttack', None), ('F', 5, *FT), ('F', 5, *FT), ('F', 5, *FT),
         ('F', 4, 'A_SnakeAttack2', None)]),
-    'lich_missile': ('LICH', 'S_HERETIC_HEAD_FLOAT', [
+    'lich_missile': ('HEAD', 'S_HERETIC_HEAD_FLOAT', [
         ('A', 5, *FT), ('B', 20, 'A_HeadAttack', None)]),
     'srcr1_missile': ('SRCR', 'S_HERETIC_SRCR1_WALK1', [
         ('Q', 7, *FT), ('R', 6, *FT), ('S', 10, 'A_Srcr1Attack', None)]),
@@ -116,7 +117,7 @@ SEE = {
     'clink': ('CLNK', 'S_HERETIC_CLINK_WALK1', [(f, 3, 'A_Chase') for f in 'ABCD']),
     'beast': ('BEAS', 'S_HERETIC_BEAST_WALK1', [(f, 3, 'A_Chase') for f in 'ABCDEF']),
     'snake': ('SNKE', 'S_HERETIC_SNAKE_WALK1', [(f, 4, 'A_Chase') for f in 'ABCD']),
-    'lich': ('LICH', 'S_HERETIC_HEAD_FLOAT', [('A', 4, 'A_Chase')]),
+    'lich': ('HEAD', 'S_HERETIC_HEAD_FLOAT', [('A', 4, 'A_Chase')]),
     'srcr1': ('SRCR', 'S_HERETIC_SRCR1_WALK1', [(f, 5, 'A_Sor1Chase') for f in 'ABCD']),
     'sor2': ('SOR2', 'S_HERETIC_SOR2_WALK1', [(f, 4, 'A_Chase') for f in 'MNOP']),
     'mntr': ('MNTR', 'S_HERETIC_MNTR_WALK1', [(f, 5, 'A_MinotaurChase') for f in 'ABCD']),
@@ -153,7 +154,7 @@ def fast(t):
     return t if t <= 0 else max(1, math.ceil(t / TIC_DIV))
 
 def proj_speed(s):
-    return min(s * PROJ_SPEED_MULT, max(s, PROJ_SPEED_CAP))
+    return min(int(round(s * PROJ_SPEED_MULT)), max(s, PROJ_SPEED_CAP))
 
 def doc(comment, data):
     return {'type': 'exdefs', 'version': '1.0.0',
@@ -246,11 +247,12 @@ def clone_chain(lump_states, start, prefix, stop=(), div=TIC_DIV, stopwords=None
         else:
             s['next'] = rename.get(s['next'], s['next'])
         s['name'] = rename[n]
-        s['tics'] = max(1, round(s['tics'] / div)) if s['tics'] > 0 else s['tics']
         if 'args' in s:
             s['args'] = [rename.get(a, a) if isinstance(a, str) else a
                          for a in scale_args(s.get('action'), s['args'])]
         out.append(s)
+    for s, t in zip(out, spread([s['tics'] for s in out], div)):
+        s['tics'] = t
     return out, rename[start]
 
 def lump_json(L, get, name):

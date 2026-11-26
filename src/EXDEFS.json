@@ -19,7 +19,7 @@
       {
         "name": "redwand_hyper",
         "displayname": "Red mod: hyper monsters",
-        "description": "Monsters move 2x faster, attack 3x faster, projectiles 3x faster, 4x damage.",
+        "description": "Monsters move 1.6x faster, attack about 3x faster, projectiles 2.4x faster, 4x damage.",
         "type": "bool",
         "default": true
       }

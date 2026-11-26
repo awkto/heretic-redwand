@@ -6,7 +6,7 @@ One file, `dist/redwand.wad`, works in both engines. Each engine ignores the oth
 - **Red Elven Wand:** does **4x** (default) or **8x** damage, and fires about 1.5x as fast as vanilla. Its crystal, shots, puffs and ammo are **red** instead of gold.
 - **Red bow:** fires **one** heavy bolt (vanilla fires one plus two small ones), or three heavy bolts when powered. Bolts fly about 1.3x as fast and hit far harder, and the bow fires about 2.5x as fast. The bow, bolts and quiver are **red** instead of green.
 - **Red Dragon Claw:** fires in **bursts of 9** shots within about a second, then cools off for a second. Each shot does **2x** damage. Its blue magic is **red**.
-- **Hyper monsters** (on by default, can be switched off): monsters move **2x** as fast, attack about **3x** as often, their projectiles fly **3x** as fast, and their attacks do **4x** damage.
+- **Hyper monsters** (on by default, can be switched off): monsters move **1.6x** as fast, attack about **2x** as often, their projectiles fly **2.4x** as fast, and their attacks do **4x** damage.
 - **Double ammo** for wand crystals, arrows and claw orbs: double the max (and the Bag of Holding max), and every pickup gives twice as much.
 
 | Engine | How the damage works | 4x / 8x switch |
@@ -56,13 +56,13 @@ Grab `redwand.wad` from the [latest release](https://github.com/awkto/heretic-re
 
 | | Vanilla | Hyper |
 |---|---|---|
-| Movement | 1x | 2x: walk animation at double speed |
-| Attack rate | 1x | about 3x: attack animations at 1/3 the time, double the chances to attack, and the "shoot more often" flag |
-| Projectile speed | 1x | 3x, capped at 60 (faster missiles can pass straight through the player) |
+| Movement | 1x | 1.6x: walk animation at 1.6x speed |
+| Attack rate | 1x | about 2x: attack animations at 1/3 the time, 1.6x the chances to attack, and the "shoot more often" flag |
+| Projectile speed | 1x | 2.4x, capped at 60 (faster missiles can pass straight through the player) |
 | Damage | 1x | 4x |
 
 - **Toggle:** remaster Options → *Red mod: hyper monsters*. GZDoom Options → *Red mod: hyper monsters*, or the console command `redwand_hyper 0`.
-- **Measured in GZDoom:** a Disciple fired 9 volleys on average in 10 seconds, against 3.5 vanilla (4 runs each).
+- **Measured in GZDoom:** a Disciple fired about 6.7 volleys on average in 10 seconds (v3.1), against 9 in v3.0 and 3.5 vanilla.
 - **Remaster (KEX):**
   - Monsters get faster copies of their walk, pain and attack sequences. With *Enhanced Enemies* on, the game's enhanced attacks are copied and sped up instead.
   - Pure melee attacks become `A_MonsterMeleeAttack` at 4x vanilla damage. Enhanced attacks that take damage arguments get those x4.
@@ -118,6 +118,7 @@ In GZDoom the wand, bow and claw are subclasses (`RedGoldWand`, `RedCrossbow`, `
   - `tests/v2_test.zs` covers the v2 changes. A crossbow pickup becomes the red bow in slot 3. Holding fire gave 9 single bolts in 88 tics; powered fire gives 3 bolts per shot. The wand fired 10 shots in 72 tics. Ammo pickups, a crossbow pickup's arrows and monster-style drops came out doubled. In a hit test at an earlier, faster bolt speed (60), 40 of 40 bolts hit a gargoyle-sized target at 300 units. No stock bolts spawned. Ammo maxes doubled with and without the bag. Screenshot: `docs/gzdoom-redbow.png`.
   - `tests/v3_claw_test.zs`: one tap fires the full burst of 9, one shot every 4 tics, then stops. Claw hits do 2x damage.
   - `tests/v3_hyper_test.zs`: Disciple volleys in 10 seconds, hyper on vs off.
+- **Sprite check:** `python3 tests/check_sprites.py dist/redwand.wad HERETIC.WAD [heretic_ex.wad]` checks that every sprite and frame the remaster states use exists. A missing one crashes the remaster (v3.0.0 crashed at the Iron Lich this way).
 - **Remaster: v1, v2 and v3 playtested on Windows (GOG build).** The wand, red bow (aim, speed, damage), red claw bursts, hyper monsters and doubled ammo all work as intended. The EXDEFS was built from what the game itself contains:
   - the IWAD's own `EX_WEAP*` lumps;
   - the argument table that `heretic_gog.exe` registers for `A_WeaponBulletAttack`: `hspread, vspread, numbullets, damagebase, damagedice, puff`.

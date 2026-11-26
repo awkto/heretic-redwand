@@ -5,3 +5,4 @@
 !/.gitkeep
 dist/
 __pycache__/
+crashlog*
